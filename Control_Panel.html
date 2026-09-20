@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Flag Battle Control Panel</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:#087a35;font-family:Arial,Helvetica,sans-serif;color:#fff;display:flex;justify-content:center;padding:20px}
+.panel{width:min(100%,520px);background:#075b29;border:2px solid #35d878;border-radius:18px;padding:20px;box-shadow:0 10px 35px #003b1b}
+h1{text-align:center;margin:0 0 18px;font-size:28px}
+label{display:block;font-weight:900;margin:14px 0 7px}
+input{width:100%;padding:14px;border:0;border-radius:10px;font-size:18px;outline:none}
+button{width:100%;padding:14px;border:0;border-radius:10px;font-size:18px;font-weight:900;cursor:pointer;margin-top:12px}
+.connect{background:#ffe500;color:#111}.start{background:#20d96b;color:#063b1b}.stop{background:#ff4d5e;color:#fff}.reset{background:#ddd;color:#111}
+.status{margin-top:16px;padding:12px;border-radius:10px;background:#043e1c;font-weight:800;text-align:center}.pointsBox{margin-top:18px;padding:16px;border-radius:12px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.12)}.pointsBox h2{font-size:20px;margin:0 0 5px}.pointsHint{font-size:12px;opacity:.8;margin:0 0 12px;line-height:1.4}.pointRow{margin-top:11px}.pointRow>label{margin:0 0 6px}.pointControl{display:grid;grid-template-columns:48px 1fr 48px;gap:7px;align-items:center}.pointControl input{width:100%;text-align:center;font-weight:900;padding:11px}.pointControl button{margin:0;padding:10px;font-size:24px;background:#ffe500;color:#111}.pointActions{margin-top:12px}.savePoints{background:#20d96b;color:#063b1b;margin-top:0}.weightStatus{margin-top:8px;padding:9px;border-radius:8px;background:#043e1c;text-align:center;font-size:12px;font-weight:800}
+.small{font-size:12px;opacity:.8;text-align:center;margin-top:12px}.ytbox{margin-top:18px;padding:16px;border-radius:12px;background:rgba(255,255,255,.12)}.ytbox h2{font-size:20px;margin:0 0 10px}.ytbox label{margin:10px 0 5px}.ytbox input{font-size:15px;padding:11px}.apiKeys{display:grid;gap:7px}.apiKeys input{border:1px solid rgba(255,255,255,.18)}.ytrow{display:grid;grid-template-columns:1fr 1fr;gap:8px}.ytbtn{background:#ff0033;color:#fff}.ytstop{background:#555;color:#fff}.ytstatus{margin-top:8px;padding:10px;border-radius:8px;background:#043e1c;font-size:13px;font-weight:800}.ytstatus.ok{background:#064f25}.ytstatus.warn{background:#6a4a00}.ytstatus.err{background:#641d25}.ytmeta{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:8px}.ytmeta div{background:rgba(0,0,0,.18);border-radius:8px;padding:8px;font-size:12px}.ytmeta b{display:block;font-size:11px;opacity:.7;margin-bottom:3px}.subscriberMode{margin-top:10px;font-size:12px;opacity:.85;line-height:1.4}
+</style>
+</head>
+<body>
+<main class="panel">
+<h1>🎮 FLAG BATTLE CONTROL</h1>
+
+<label for="code">Game Connection Code</label>
+<input id="code" maxlength="6" placeholder="Enter game code" autocomplete="off">
+<button class="connect" id="connectBtn">CONNECT TO GAME</button>
+
+<div class="status" id="status">Remote: not connected</div>
+
+<button class="start" id="startBtn" disabled>▶ START GAME</button>
+<button class="stop" id="stopBtn" disabled>⏹ STOP GAME</button>
+<button class="reset" id="resetBtn" disabled>↻ RESET COUNTS</button>
+
+<div class="pointsBox">
+  <h2>⚙️ Point Settings</h2>
+  <p class="pointsHint">Set how many points each action gives. Changes are sent to the game immediately.</p>
+  <div class="pointRow"><label for="commentRange">💬 Comment Points</label><div class="pointControl"><button type="button" class="minus" data-target="commentRange">−</button><input id="commentRange" type="number" min="0" step="1" value="1" inputmode="numeric"><button type="button" class="plus" data-target="commentRange">+</button></div></div>
+  <div class="pointRow"><label for="subscribeRange">🔔 Subscribe Points</label><div class="pointControl"><button type="button" class="minus" data-target="subscribeRange">−</button><input id="subscribeRange" type="number" min="0" step="1" value="10" inputmode="numeric"><button type="button" class="plus" data-target="subscribeRange">+</button></div></div>
+  <div class="pointRow"><label for="customRange">✏️ Custom Points</label><div class="pointControl"><button type="button" class="minus" data-target="customRange">−</button><input id="customRange" type="number" min="0" step="1" value="1" inputmode="numeric"><button type="button" class="plus" data-target="customRange">+</button></div></div>
+  <div class="pointActions"><button type="button" class="savePoints" id="saveWeightsBtn">💾 SAVE POINT SETTINGS</button><div class="weightStatus" id="weightStatus">Comment 1 • Subscribe 10 • Custom 1</div></div>
+</div>
+
+<div class="small">Enter the exact 6-character code shown on the game screen.</div>
+<div class="ytbox">
+  <h2>▶ YouTube Live Integration</h2>
+  <label>YouTube Data API v3 Keys (5 slots — next key auto-starts when the current key hits quota/invalid-key limits)</label>
+  <div class="apiKeys">
+    <input class="ytApiKey" id="ytApiKey1" type="password" placeholder="API Key 1 — AIza..." autocomplete="off">
+    <input class="ytApiKey" id="ytApiKey2" type="password" placeholder="API Key 2 — AIza..." autocomplete="off">
+    <input class="ytApiKey" id="ytApiKey3" type="password" placeholder="API Key 3 — AIza..." autocomplete="off">
+    <input class="ytApiKey" id="ytApiKey4" type="password" placeholder="API Key 4 — AIza..." autocomplete="off">
+    <input class="ytApiKey" id="ytApiKey5" type="password" placeholder="API Key 5 — AIza..." autocomplete="off">
+  </div>
+  <label for="ytVideoId">YouTube Live URL / Video ID</label>
+  <input id="ytVideoId" type="text" placeholder="Paste the full YouTube live link or video ID" autocomplete="off">
+  <label for="ytOAuth">OAuth Access Token (for subscriber names)</label>
+  <input id="ytOAuth" type="password" placeholder="Optional: ya29..." autocomplete="off">
+  <div class="ytrow">
+    <button class="ytbtn" id="ytStartBtn" disabled>▶ START YOUTUBE</button>
+    <button class="ytstop" id="ytStopBtn" disabled>⏹ STOP YOUTUBE</button>
+  </div>
+  <div class="ytstatus" id="ytStatus">YouTube: not connected</div>
+  <div class="ytmeta"><div><b>CONNECTION</b><span id="ytConnState">🔴 Not connected</span></div><div><b>ACTIVE API</b><span id="ytActiveKey">—</span></div><div><b>LIVE CHAT</b><span id="ytChatState">—</span></div><div><b>LAST DATA</b><span id="ytLastData">—</span></div></div>
+  <div class="subscriberMode">Comments are read from the live chat. If a comment contains a country name (for example <b>Bangladesh</b>), that country's flag gets the Comment Points. Subscribes do <b>not</b> go to any flag; the subscriber name is shown on the game and Subscribe Points are added to the global subscribe total. Subscriber names require an OAuth token authorized for your channel.</div>
+</div>
+</main>
+
+<script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js"></script>
+<script>
+let peer=null,conn=null;
+let ytTimer=null,ytSubTimer=null,ytRunning=false,ytLiveChatId=null,ytPageToken=null,ytSeenMessages=new Set(),ytSeenSubs=new Set(),ytLastSubPoll=0,ytChatInitialized=false,ytSubInitialized=false;
+const ytApiKeys=[1,2,3,4,5].map(i=>document.getElementById('ytApiKey'+i));
+let ytKeyIndex=0,ytExhaustedKeys=new Set();
+const codeEl=document.getElementById('code');
+const statusEl=document.getElementById('status');
+const connectBtn=document.getElementById('connectBtn');
+const startBtn=document.getElementById('startBtn');
+const stopBtn=document.getElementById('stopBtn');
+const resetBtn=document.getElementById('resetBtn');
+const ytVideoId=document.getElementById('ytVideoId');
+const ytOAuth=document.getElementById('ytOAuth');
+const ytStartBtn=document.getElementById('ytStartBtn');
+const ytStopBtn=document.getElementById('ytStopBtn');
+const ytStatus=document.getElementById('ytStatus');
+const ytConnState=document.getElementById('ytConnState');
+const ytActiveKey=document.getElementById('ytActiveKey');
+const ytChatState=document.getElementById('ytChatState');
+const ytLastData=document.getElementById('ytLastData');
+const commentRange=document.getElementById('commentRange');const subscribeRange=document.getElementById('subscribeRange');const customRange=document.getElementById('customRange');const weightStatus=document.getElementById('weightStatus');const saveWeightsBtn=document.getElementById('saveWeightsBtn');
+function normalizePointInput(el){let v=Math.floor(Number(el.value));if(!Number.isFinite(v)||v<0)v=0;el.value=String(v);return v;}
+[commentRange,subscribeRange,customRange].forEach(el=>el.addEventListener('input',()=>{normalizePointInput(el);const w=getWeights();weightStatus.textContent=`Comment ${w.comment} • Subscribe ${w.subscribe} • Custom ${w.custom}`;try{localStorage.setItem('flagbattle_weights',JSON.stringify(w))}catch(e){};sendCurrentWeights(true);}));
+document.querySelectorAll('.pointControl button').forEach(btn=>btn.addEventListener('click',()=>{const el=document.getElementById(btn.dataset.target);const delta=btn.classList.contains('plus')?1:-1;el.value=String(Math.max(0,Math.floor(Number(el.value)||0)+delta));el.dispatchEvent(new Event('input',{bubbles:true}));}));
+saveWeightsBtn.addEventListener('click',saveWeights);
+
+function setStatus(t){statusEl.textContent=t}
+function setYTStatus(t){ytStatus.textContent='YouTube: '+t; const low=String(t).toLowerCase(); ytStatus.className='ytstatus '+(low.includes('live')||low.includes('connected')?'ok':low.includes('error')||low.includes('invalid')||low.includes('not connected')||low.includes('stopped')?'err':'warn');}
+function setYTConnection(state){ytConnState.textContent=state}
+function setYTLastData(){ytLastData.textContent=new Date().toLocaleTimeString()}
+function setYTKeyLabel(){ytActiveKey.textContent=currentYTKey()?('Key '+(ytKeyIndex+1)+' / 5'):'—'}
+let relayTimer=null, connectedCode='';
+function disconnect(){
+  if(relayTimer){clearInterval(relayTimer);relayTimer=null;}
+  if(conn){try{conn.close()}catch(e){}}
+  conn=null; connectedCode='';
+  startBtn.disabled=stopBtn.disabled=resetBtn.disabled=true;
+}
+function setupDataConnection(c){
+  conn=c;
+  c.on('open',()=>{
+    connectedCode=codeEl.value.trim().toUpperCase();
+    setStatus('Remote: connected');
+    startBtn.disabled=stopBtn.disabled=resetBtn.disabled=false;
+    sendCurrentWeights(); updateYTButtons();
+    setYTStatus(ytRunning?'LIVE • comments connected':'Game connected • YouTube ready');
+  });
+  c.on('data',m=>{ if(m?.type==='state'){} });
+  c.on('close',()=>{
+    conn=null; startBtn.disabled=stopBtn.disabled=resetBtn.disabled=true;
+    setStatus('Game disconnected');
+  });
+  c.on('error',()=>{
+    setStatus('Connection error — check the game code');
+  });
+}
+const rtcConfig={
+  iceServers:[
+    {urls:'stun:stun.l.google.com:19302'},
+    {urls:'stun:stun.cloudflare.com:3478'},
+    {urls:'stun:global.stun.twilio.com:3478'},
+    {urls:'turn:openrelay.metered.ca:80',username:'openrelayproject',credential:'openrelayproject'},
+    {urls:'turn:openrelay.metered.ca:443?transport=tcp',username:'openrelayproject',credential:'openrelayproject'},
+    {urls:'turns:openrelay.metered.ca:443?transport=tcp',username:'openrelayproject',credential:'openrelayproject'}
+  ],
+  iceTransportPolicy:'all'
+};
+let peerReady=false, peerRetryTimer=null, connectAttemptTimer=null, connectTarget='';
+
+function initPeer(){
+  if(peerRetryTimer){clearTimeout(peerRetryTimer);peerRetryTimer=null;}
+  peerReady=false;
+  try{if(peer&&!peer.destroyed)peer.destroy()}catch(e){}
+  peer=null;
+  setStatus('Connecting to signaling…');
+  if(typeof Peer!=='function'){
+    setStatus('PeerJS failed to load — check internet');
+    schedulePeerRetry(2500);
+    return;
+  }
+  try{
+    peer=new Peer({debug:0,config:rtcConfig});
+  }catch(e){
+    setStatus('Signaling start failed — retrying…');
+    schedulePeerRetry(2000);
+    return;
+  }
+  peer.on('open',()=>{
+    peerReady=true;
+    setStatus(connectTarget?'Connecting to game…':'Ready — enter the game code');
+    if(connectTarget) attemptGameConnection(connectTarget);
+  });
+  peer.on('disconnected',()=>{
+    peerReady=false;
+    if(connectTarget)setStatus('Signaling reconnecting…');
+    try{if(peer&&!peer.destroyed)peer.reconnect()}catch(e){}
+  });
+  peer.on('close',()=>{peerReady=false;});
+  peer.on('error',e=>{
+    peerReady=false;
+    const type=e&&e.type||'';
+    if(type==='peer-unavailable'){
+      setStatus('Game not found — retrying connection…');
+    }else{
+      setStatus('Signaling reconnecting…');
+    }
+    if(connectTarget){
+      schedulePeerRetry(1200);
+    }
+  });
+}
+
+function schedulePeerRetry(ms){
+  if(peerRetryTimer)return;
+  peerRetryTimer=setTimeout(()=>{
+    peerRetryTimer=null;
+    if(connectTarget)initPeer();
+    else if(!peer||peer.destroyed)initPeer();
+  },ms||1500);
+}
+
+function attemptGameConnection(code){
+  if(!connectTarget || connectTarget!==code)return;
+  if(!peer||peer.destroyed){initPeer();return;}
+  if(!peerReady){setStatus('Connecting to signaling…');return;}
+  if(conn?.open)return;
+  let c;
+  try{
+    c=peer.connect('flagbattle-'+code,{reliable:true,serialization:'json',metadata:{role:'control-panel'}});
+  }catch(e){
+    setStatus('Connection retrying…');
+    schedulePeerRetry(1200);
+    return;
+  }
+  setupDataConnection(c);
+  let settled=false;
+  const timeout=setTimeout(()=>{
+    if(settled)return;
+    settled=true;
+    try{c.close()}catch(e){}
+    if(connectTarget===code){
+      setStatus('Game connection retrying…');
+      schedulePeerRetry(900);
+    }
+  },7000);
+  c.on('open',()=>{
+    settled=true;
+    clearTimeout(timeout);
+  });
+  c.on('close',()=>{
+    clearTimeout(timeout);
+    if(connectTarget===code && !conn?.open) schedulePeerRetry(900);
+  });
+}
+
+function connectToGame(code){
+  code=String(code||'').trim().toUpperCase();
+  if(!/^[A-Z0-9]{6}$/.test(code)){
+    setStatus('Enter a valid 6-character code');
+    return;
+  }
+  disconnect();
+  connectTarget=code;
+  setStatus('Connecting to game…');
+  if(!peer||peer.destroyed){initPeer();return;}
+  if(peerReady){attemptGameConnection(code);return;}
+  initPeer();
+}
+
+connectBtn.addEventListener('click',()=>{
+  const code=codeEl.value.trim().toUpperCase();
+  if(!/^[A-Z0-9]{6}$/.test(code)){
+    setStatus('Enter a valid 6-character code');
+    return;
+  }
+  connectToGame(code);
+});
+
+initPeer();
+function send(msg){
+  if(conn?.open){try{conn.send(msg);return true}catch(e){}}
+  setStatus('Remote: not connected'); return false;
+}
+startBtn.addEventListener('click',()=>send({type:'start'}));
+stopBtn.addEventListener('click',()=>send({type:'stop'}));
+resetBtn.addEventListener('click',()=>send({type:'reset'}));
+function getWeights(){return {comment:Number(document.getElementById('commentRange').value),subscribe:Number(document.getElementById('subscribeRange').value),custom:Number(document.getElementById('customRange').value)}}
+function sendCurrentWeights(force=false){if(conn?.open){try{conn.send({type:'weights',weights:getWeights(),force:true,ts:Date.now()});return true}catch(e){}} if(force)setStatus('Point settings waiting for game connection…'); return false}
+function saveWeights(){const weights=getWeights();localStorage.setItem('flagbattle_weights',JSON.stringify(weights));document.getElementById('weightStatus').textContent=`Comment ${weights.comment} • Subscribe ${weights.subscribe} • Custom ${weights.custom}`;sendCurrentWeights(true)}
+(function(){try{const w=JSON.parse(localStorage.getItem('flagbattle_weights')||'{}');if(Number.isFinite(w.comment))commentRange.value=w.comment;if(Number.isFinite(w.subscribe))subscribeRange.value=w.subscribe;if(Number.isFinite(w.custom))customRange.value=w.custom;weightStatus.textContent=`Comment ${commentRange.value} • Subscribe ${subscribeRange.value} • Custom ${customRange.value}`}catch(e){}})();
+function sendCommentCount(country,name){send({type:'add',country,name,count:Number(commentRange.value),points:Number(commentRange.value),source:'youtube-comment'})}
+function sendSubscribeEvent(name,channelId){send({type:'subscribe',name:String(name||'New Subscriber'),channelId:channelId||'',points:Number(subscribeRange.value),source:'youtube-subscribe'})}
+function sendCustomCount(country,name){send({type:'add',country,name,source:'custom'})}
+
+// ---------- YouTube Data API v3 ----------
+const COUNTRY_ALIASES={
+  usa:'United States',us:'United States',america:'United States',uk:'United Kingdom',britain:'United Kingdom',england:'United Kingdom',uae:'United Arab Emirates',bd:'Bangladesh',bangla:'Bangladesh',bharat:'India',korea:'South Korea',russia:'Russia',iran:'Iran',china:'China',japan:'Japan',pak:'Pakistan'
+};
+let countryNames=[];
+function buildCountryNames(){
+  // Keep this list aligned with the game's country names. The matching is case-insensitive.
+  countryNames=[...new Set(['Afghanistan','Albania','Algeria','Andorra','Angola','Antigua & Barbuda','Argentina','Armenia','Australia','Austria','Azerbaijan','Bahamas','Bahrain','Bangladesh','Barbados','Belarus','Belgium','Belize','Benin','Bhutan','Bolivia','Bosnia & Herzegovina','Botswana','Brazil','Brunei','Bulgaria','Burkina Faso','Burundi','Cabo Verde','Cambodia','Cameroon','Canada','Central African Republic','Chad','Chile','China','Colombia','Comoros','Congo','Costa Rica','Croatia','Cuba','Cyprus','Czechia','Denmark','Djibouti','Dominica','Dominican Republic','Ecuador','Egypt','El Salvador','Estonia','Eswatini','Ethiopia','Fiji','Finland','France','Gabon','Gambia','Georgia','Germany','Ghana','Greece','Grenada','Guatemala','Guinea','Guyana','Haiti','Honduras','Hungary','Iceland','India','Indonesia','Iran','Iraq','Ireland','Israel','Italy','Jamaica','Japan','Jordan','Kazakhstan','Kenya','Kiribati','Kuwait','Kyrgyzstan','Laos','Latvia','Lebanon','Lesotho','Liberia','Libya','Liechtenstein','Lithuania','Luxembourg','Madagascar','Malawi','Malaysia','Maldives','Mali','Malta','Mauritania','Mauritius','Mexico','Moldova','Monaco','Mongolia','Montenegro','Morocco','Mozambique','Myanmar','Namibia','Nauru','Nepal','Netherlands','New Zealand','Nicaragua','Niger','Nigeria','North Korea','North Macedonia','Norway','Oman','Pakistan','Palau','Panama','Papua New Guinea','Paraguay','Peru','Philippines','Poland','Portugal','Qatar','Romania','Russia','Rwanda','Saint Lucia','Samoa','San Marino','Saudi Arabia','Senegal','Serbia','Seychelles','Singapore','Slovakia','Slovenia','Somalia','South Africa','South Korea','South Sudan','Spain','Sri Lanka','Sudan','Suriname','Sweden','Switzerland','Syria','Taiwan','Tajikistan','Tanzania','Thailand','Togo','Tonga','Trinidad & Tobago','Tunisia','Turkey','Turkmenistan','Tuvalu','Uganda','Ukraine','United Arab Emirates','United Kingdom','United States','Uruguay','Uzbekistan','Vanuatu','Vatican City','Venezuela','Vietnam','Yemen','Zambia','Zimbabwe'])];
+}
+buildCountryNames();
+function normalizeText(s){return String(s||'').toLowerCase().replace(/[’']/g,"'").replace(/[^a-z0-9&+ ]/g,' ').replace(/\s+/g,' ').trim()}
+function countryFromComment(text){
+  const n=normalizeText(text);
+  if(!n)return null;
+  // Match country names/aliases as whole words, even when the original
+  // comment had punctuation/emoji around the country name.
+  const words=n.split(' ').filter(Boolean);
+  const wordSet=new Set(words);
+  for(const [alias,country] of Object.entries(COUNTRY_ALIASES)){
+    const a=normalizeText(alias);
+    if(a && (a.includes(' ') ? n.includes(a) : wordSet.has(a))) return country;
+  }
+  const sorted=[...countryNames].sort((a,b)=>normalizeText(b).length-normalizeText(a).length);
+  for(const c of sorted){
+    const cn=normalizeText(c);
+    if(!cn)continue;
+    if(cn.includes(' ')){ if((' '+n+' ').includes(' '+cn+' ')) return c; }
+    else if(wordSet.has(cn)) return c;
+  }
+  return null;
+}
+function getYTKeys(){return ytApiKeys.map(x=>x.value.trim()).filter(Boolean)}
+function currentYTKey(){return ytApiKeys[ytKeyIndex]?.value.trim()||''}
+function saveYTKeys(){try{localStorage.setItem('flagbattle_yt_keys',JSON.stringify(ytApiKeys.map(x=>x.value.trim())))}catch(e){}}
+(function(){try{const keys=JSON.parse(localStorage.getItem('flagbattle_yt_keys')||'[]');keys.forEach((v,i)=>{if(ytApiKeys[i]&&typeof v==='string')ytApiKeys[i].value=v})}catch(e){}})();
+ytApiKeys.forEach(x=>x.addEventListener('input',saveYTKeys));
+function isKeyFailure(e){const code=Number(e?.status||0);const reason=String(e?.reason||'').toLowerCase();const msg=String(e?.message||'').toLowerCase();return code===400||code===401||code===403||/quota|dailylimit|keyinvalid|api key not valid|forbidden|accessnotconfigured/.test(reason+' '+msg)}
+async function ytFetch(url,opts={}){const r=await fetch(url,opts);const data=await r.json().catch(()=>({}));if(!r.ok){const err=new Error(data?.error?.message||('HTTP '+r.status));err.status=r.status;err.reason=data?.error?.errors?.[0]?.reason||data?.error?.status||'';throw err}return data}
+async function withWorkingKey(requestFn){
+  const keys=getYTKeys();
+  if(!keys.length)throw new Error('Enter at least one YouTube API key');
+  let attempts=0;
+  while(attempts<ytApiKeys.length){
+    if(ytKeyIndex>=ytApiKeys.length)ytKeyIndex=0;
+    const key=ytApiKeys[ytKeyIndex]?.value.trim();
+    if(!key||ytExhaustedKeys.has(ytKeyIndex)){ytKeyIndex=(ytKeyIndex+1)%ytApiKeys.length;attempts++;continue}
+    try{return await requestFn(key)}catch(e){
+      if(!isKeyFailure(e))throw e;
+      ytExhaustedKeys.add(ytKeyIndex);
+      const old=ytKeyIndex;
+      ytKeyIndex=(ytKeyIndex+1)%ytApiKeys.length;
+      const remaining=ytApiKeys.filter((x,i)=>x.value.trim()&&!ytExhaustedKeys.has(i)).length;
+      setYTStatus('API Key '+(old+1)+' ended/invalid → switching to Key '+(ytKeyIndex+1)+' ('+remaining+' remaining)');
+      attempts++;
+    }
+  }
+  throw new Error('All 5 YouTube API keys are exhausted or invalid');
+}
+function extractYouTubeVideoId(input){
+  const raw=String(input||'').trim();
+  if(!raw) return '';
+  // Accept a plain 11-character YouTube video ID.
+  if(/^[A-Za-z0-9_-]{11}$/.test(raw)) return raw;
+  try{
+    const u=new URL(raw);
+    const host=u.hostname.toLowerCase().replace(/^www\./,'');
+    if(host==='youtu.be'){
+      const id=u.pathname.split('/').filter(Boolean)[0]||'';
+      return /^[A-Za-z0-9_-]{11}$/.test(id)?id:'';
+    }
+    if(host==='youtube.com' || host==='m.youtube.com'){
+      const q=u.searchParams.get('v')||'';
+      if(/^[A-Za-z0-9_-]{11}$/.test(q)) return q;
+      const parts=u.pathname.split('/').filter(Boolean);
+      const liveIndex=parts.findIndex(x=>x==='live');
+      if(liveIndex>=0 && /^[A-Za-z0-9_-]{11}$/.test(parts[liveIndex+1]||'')) return parts[liveIndex+1];
+      const videoIndex=parts.findIndex(x=>x==='video');
+      if(videoIndex>=0 && /^[A-Za-z0-9_-]{11}$/.test(parts[videoIndex+1]||'')) return parts[videoIndex+1];
+    }
+  }catch(e){}
+  return '';
+}
+async function getLiveChatId(){
+  const input=ytVideoId.value.trim();
+  const video=extractYouTubeVideoId(input);
+  if(!video)throw new Error('Enter a valid YouTube live URL or 11-character video ID');
+  // Normalize the field so the user can see exactly which video ID is being used.
+  ytVideoId.value=video;
+  return withWorkingKey(async key=>{
+    const u='https://www.googleapis.com/youtube/v3/videos?part=liveStreamingDetails&id='+encodeURIComponent(video)+'&key='+encodeURIComponent(key);
+    const d=await ytFetch(u);
+    const item=d?.items?.[0];
+    if(!item)throw new Error('YouTube video was not found. Check the live URL/video ID and API key.');
+    const details=item.liveStreamingDetails||{};
+    const id=details.activeLiveChatId;
+    if(!id){
+      if(details.actualEndTime) throw new Error('This YouTube broadcast has already ended. Start the live broadcast and connect again.');
+      if(details.scheduledStartTime && !details.actualStartTime) throw new Error('This YouTube broadcast is scheduled, but not live yet. Start the live broadcast first.');
+      throw new Error('No active live chat found. Make sure this exact video is currently live and Live Chat is enabled.');
+    }
+    return id;
+  });
+}
+async function pollLiveChat(){
+  if(!ytRunning||!ytLiveChatId)return;
+  setYTKeyLabel();
+  try{
+    const d=await withWorkingKey(async key=>{
+      let url='https://www.googleapis.com/youtube/v3/liveChat/messages?liveChatId='+encodeURIComponent(ytLiveChatId)+'&part=snippet,authorDetails&maxResults=200&key='+encodeURIComponent(key);
+      if(ytPageToken)url+='&pageToken='+encodeURIComponent(ytPageToken);
+      return ytFetch(url);
+    });
+    ytPageToken=d.nextPageToken||ytPageToken;
+    const items=Array.isArray(d.items)?d.items:[];
+    let received=0, scored=0;
+    if(!ytChatInitialized){
+      // Baseline existing chat only. New messages on later polls are scored.
+      for(const item of items)if(item?.id)ytSeenMessages.add(item.id);
+      ytChatInitialized=true;
+    }else{
+      for(const item of items){
+        if(!item?.id || ytSeenMessages.has(item.id))continue;
+        ytSeenMessages.add(item.id);
+        if(ytSeenMessages.size>5000)ytSeenMessages=new Set([...ytSeenMessages].slice(-2500));
+        if(item?.snippet?.type!=='textMessageEvent')continue;
+        received++;
+        const text=String(item?.snippet?.displayMessage||item?.snippet?.textMessageDetails?.messageText||'');
+        const country=countryFromComment(text);
+        if(country){
+          scored++;
+          sendCommentCount(country,item?.authorDetails?.displayName||'');
+        }
+      }
+    }
+    setYTStatus('LIVE • comments connected');
+    setYTConnection('🟢 Connected');
+    ytChatState.textContent='🟢 Receiving'+(received?` • ${scored}/${received} scored`:'');
+    setYTLastData();
+    const wait=Math.max(1000,Number(d.pollingIntervalMillis||5000));
+    clearTimeout(ytTimer);ytTimer=setTimeout(pollLiveChat,wait);
+  }catch(e){
+    setYTStatus('error: '+e.message);setYTConnection('🔴 Error');ytChatState.textContent='🔴 Not receiving';
+    clearTimeout(ytTimer);ytTimer=setTimeout(pollLiveChat,7000);
+  }
+}
+async function pollSubscribers(){
+  if(!ytRunning||!ytOAuth.value.trim())return;
+  const token=ytOAuth.value.trim();
+  const since=ytLastSubPoll;
+  try{
+    let url='https://www.googleapis.com/youtube/v3/subscriptions?part=snippet,contentDetails&myRecentSubscribers=true&maxResults=50';
+    const d=await ytFetch(url,{headers:{Authorization:'Bearer '+token}});
+    const items=d.items||[];
+    // The first response is only a baseline; later responses represent new IDs.
+    if(!ytSubInitialized){
+      for(const item of items)if(item?.id)ytSeenSubs.add(item.id);
+      ytSubInitialized=true;
+    }else{
+      for(const item of items){
+        const id=item.id;if(ytSeenSubs.has(id))continue;ytSeenSubs.add(id);if(ytSeenSubs.size>5000){ytSeenSubs=new Set([...ytSeenSubs].slice(-2500))}
+        const name=item?.snippet?.subscriberSnippet?.title||item?.snippet?.title||'New Subscriber';
+        const channelId=item?.snippet?.subscriberSnippet?.channelId||'';
+        sendSubscribeEvent(name,channelId);
+      }
+    }
+    ytLastSubPoll=Date.now();
+  }catch(e){setYTStatus('LIVE • comments on; subscriber OAuth error: '+e.message)}
+  if(ytRunning){clearTimeout(ytSubTimer);ytSubTimer=setTimeout(pollSubscribers,10000)}
+}
+async function startYouTube(){
+  if(!conn?.open){setYTStatus('connect to game first');setYTConnection('🔴 Game not connected');return}
+  ytStartBtn.disabled=true;setYTStatus('connecting…');
+  try{
+    saveYTKeys();ytKeyIndex=0;ytExhaustedKeys.clear();ytLiveChatId=await getLiveChatId(); setYTKeyLabel();ytPageToken=null;ytSeenMessages.clear();ytSeenSubs.clear();ytChatInitialized=false;ytSubInitialized=false;ytLastSubPoll=Date.now();ytRunning=true;ytStopBtn.disabled=false;
+    send({type:'youtubeStatus',connected:true});pollLiveChat();
+    if(ytOAuth.value.trim())pollSubscribers();
+  }catch(e){ytRunning=false;ytStartBtn.disabled=false;ytStopBtn.disabled=true;setYTStatus(e.message);setYTConnection('🔴 Failed');ytChatState.textContent='🔴 Not connected'}
+}
+function stopYouTube(){ytRunning=false;clearTimeout(ytTimer);clearTimeout(ytSubTimer);ytLiveChatId=null;ytPageToken=null;ytStartBtn.disabled=!conn?.open;ytStopBtn.disabled=true;setYTStatus('stopped');setYTConnection('🔴 Stopped');ytChatState.textContent='—';ytLastData.textContent='—';}
+ytStartBtn.addEventListener('click',startYouTube);ytStopBtn.addEventListener('click',stopYouTube);
+function updateYTButtons(){ytStartBtn.disabled=!conn?.open||ytRunning;ytStopBtn.disabled=!ytRunning}
+updateYTButtons();
+</script>
+</body></html>
